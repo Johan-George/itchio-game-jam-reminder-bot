@@ -1,5 +1,3 @@
-# main.py
-
 import os
 import requests
 import time
@@ -10,12 +8,11 @@ from bs4 import BeautifulSoup
 WEBHOOK_URL_1 = os.getenv('DISCORD_WEBHOOK_URL_1')
 WEBHOOK_URL_2 = os.getenv('DISCORD_WEBHOOK_URL_2')
 WEBHOOK_URLS = [
-    os.getenv('DISCORD_WEBHOOK_URL_1'),
-    os.getenv('DISCORD_WEBHOOK_URL_2')
+    WEBHOOK_URL_1,
+    WEBHOOK_URL_2
 ]
 
 POSTED_FILE = 'posted_jams.txt'
-
 
 def load_posted_jams():
     if not os.path.exists(POSTED_FILE):
@@ -23,11 +20,9 @@ def load_posted_jams():
     with open(POSTED_FILE, 'r') as f:
         return set(line.strip() for line in f.readlines())
 
-
 def save_posted_jam(jam_url):
     with open(POSTED_FILE, 'a') as f:
         f.write(jam_url + '\n')
-
 
 def fetch_featured_ongoing_jams():
     url = 'https://itch.io/jams'
@@ -43,7 +38,7 @@ def fetch_featured_ongoing_jams():
         return jams
 
     for jam in featured.select('.jam'):
-        link_tag = jam.select_one('a')  # Changed from 'a.title' to just 'a'
+        link_tag = jam.select_one('a.title')
         date_range_tag = jam.select_one('.date_range')
 
         if not link_tag or not date_range_tag:
@@ -72,7 +67,6 @@ def fetch_featured_ongoing_jams():
 
     return jams
 
-
 def post_to_discord(jams, posted_jams):
     for jam in jams:
         if jam in posted_jams:
@@ -91,7 +85,6 @@ def post_to_discord(jams, posted_jams):
                 except Exception as e:
                     print(f"❌ Discord error: {e}")
 
-
 def send_test_message():
     data = {
         "content":
@@ -106,7 +99,6 @@ def send_test_message():
             except Exception as e:
                 print(f"❌ Test message error: {e}")
 
-
 def main():
     print("🚀 Bot started")
     send_test_message()
@@ -114,15 +106,12 @@ def main():
     posted_jams = load_posted_jams()
 
     print("🚀 Checking for featured jams...")
-
     jams = fetch_featured_ongoing_jams()
     if jams:
         post_to_discord(jams, posted_jams)
+        print(f"✅ Featured jams posted.")
     else:
         print("❌ No new featured jams found.")
-
-    print("✅ Check completed.")
-
 
 if __name__ == '__main__':
     main()
