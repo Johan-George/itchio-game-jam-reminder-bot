@@ -3,7 +3,7 @@ name: Run Webhook Script Daily
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 9 * * *'  # Runs at 9:00 AM UTC every day
+    - cron: '0 9 * * *'
 
 jobs:
   run_script:
@@ -11,13 +11,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.x
+      
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+      
       - name: Run the script
+        env:  # Pass the GitHub secrets as environment variables
+          DISCORD_WEBHOOK_URL_1: ${{ secrets.DISCORD_WEBHOOK_URL_1 }}
+          DISCORD_WEBHOOK_URL_2: ${{ secrets.DISCORD_WEBHOOK_URL_2 }}
         run: |
-          python main.py  # Replace with your actual script name
+          python main.py
