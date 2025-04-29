@@ -1,7 +1,4 @@
 # main.py
-print("Webhook 1 loaded:", bool(WEBHOOK_URL_1))
-print("Webhook 2 loaded:", bool(WEBHOOK_URL_2))
-
 import os
 import requests
 from datetime import datetime
