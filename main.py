@@ -1,13 +1,18 @@
 # main.py
+
 import os
 import requests
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 
 # Setup webhooks
 WEBHOOK_URL_1 = os.getenv('DISCORD_WEBHOOK_URL_1')
 WEBHOOK_URL_2 = os.getenv('DISCORD_WEBHOOK_URL_2')
-WEBHOOK_URLS = [WEBHOOK_URL_1, WEBHOOK_URL_2]
+WEBHOOK_URLS = [
+    os.getenv('DISCORD_WEBHOOK_URL_1'),
+    os.getenv('DISCORD_WEBHOOK_URL_2')
+]
 
 POSTED_FILE = 'posted_jams.txt'
 
@@ -38,7 +43,7 @@ def fetch_featured_ongoing_jams():
         return jams
 
     for jam in featured.select('.jam'):
-        link_tag = jam.select_one('a')
+        link_tag = jam.select_one('a')  # Changed from 'a.title' to just 'a'
         date_range_tag = jam.select_one('.date_range')
 
         if not link_tag or not date_range_tag:
@@ -87,21 +92,36 @@ def post_to_discord(jams, posted_jams):
                     print(f"❌ Discord error: {e}")
 
 
+def send_test_message():
+    data = {
+        "content":
+        "✅ Bot is running! Waiting to detect featured ongoing game jams..."
+    }
+    for webhook in WEBHOOK_URLS:
+        if webhook:
+            try:
+                res = requests.post(webhook, json=data)
+                print("✅ Test message sent." if res.status_code ==
+                      204 else f"❌ Test failed: {res.text}")
+            except Exception as e:
+                print(f"❌ Test message error: {e}")
+
+
 def main():
+    print("🚀 Bot started")
+    send_test_message()
+
     posted_jams = load_posted_jams()
+
     print("🚀 Checking for featured jams...")
 
-    # Fetch the featured ongoing jams
     jams = fetch_featured_ongoing_jams()
-
-    # If no jams were found, print a message
-    if not jams:
-        print("❌ No new featured jams found.")
-    else:
-        # If jams were found, post them to Discord
+    if jams:
         post_to_discord(jams, posted_jams)
+    else:
+        print("❌ No new featured jams found.")
 
-    print(f"✅ Checked at {datetime.utcnow()} UTC")
+    print("✅ Check completed.")
 
 
 if __name__ == '__main__':
