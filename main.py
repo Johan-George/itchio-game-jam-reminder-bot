@@ -41,7 +41,7 @@ def fetch_featured_ongoing_jams():
         return jams
 
     for jam in featured.select('.jam'):
-        link_tag = jam.select_one('a.title')
+        link_tag = jam.select_one('a')
         date_range_tag = jam.select_one('.date_range')
 
         if not link_tag or not date_range_tag:
